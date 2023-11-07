@@ -1,4 +1,14 @@
 {
   "name": "RestAurant",
-  "displayName": "RestAurant"
+  "displayName": "RestAurant",
+  "expo": {
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ]
+    ]
+  }
 }

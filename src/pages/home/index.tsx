@@ -1,9 +1,7 @@
 import {
-  Alert,
+    Alert,
   Image,
   ImageBackground,
-  PermissionsAndroid,
-  Platform,
   StyleSheet,
   Text,
   View } from "react-native";
@@ -12,7 +10,8 @@ import axios from 'axios';
 import { RectButton } from 'react-native-gesture-handler';
 import { Feather } from '@expo/vector-icons'; 
 import { Picker } from "@react-native-picker/picker";
-import Geolocation from 'react-native-geolocation-service';
+
+import * as Location from 'expo-location';
 
 const Home = () => {
   interface IBGEUF {
@@ -29,11 +28,13 @@ const Home = () => {
     value: string;
   }
 
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [errorMsg, setErrorMsg] = useState('');
+
   const [ufs, setUfs] = useState<SelectItem[]>([]);
   const [cities, setCities] = useState<SelectItem[]>([]);
   const [selectedUF, setSelectedUF] = useState('0');
   const [selectedCity, setSelectedCity] = useState('0');
-  const [hasLocationPermission, setLocationPermission] = useState(false);
   
   useEffect(() => {
     if (selectedUF === '0') {
@@ -64,42 +65,31 @@ const Home = () => {
       setUfs(ufInitials);
     });
 
-    async function getLocationPermission() {
-      let permissionResult = '';
-      if (Platform.OS === 'ios') {
-        permissionResult = await Geolocation.requestAuthorization('whenInUse');
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
       } else {
-        permissionResult = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            'title': 'Permissão de Geolocalização',
-            'message': 'Podemos acessar a sua localização?',
-            'buttonNegative': 'Negar',
-            'buttonPositive': 'Aceitar',
-          },
-        );
+        let location = await Location.getCurrentPositionAsync({});
+        setLocation(location);
       }
-      console.log(permissionResult);
-      //if (permissionResult === PermissionsAndroid.RESULTS.GRANTED)
-      //  setLocationPermission(true);
-    }
-
-    getLocationPermission();
+    })();
   }, []);
 
   useEffect(() => {
-    if (hasLocationPermission) {
-      Geolocation.getCurrentPosition(
-        (position) => {
-          Alert.alert('Posicao', `altitude: ${position.coords.altitude}\nlatitude: ${position.coords.latitude}`);
-        },
-        (error) => {
-          console.log(error.code, error.message);
-        },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-      );
+    if (errorMsg !== '')
+      Alert.alert('Info', errorMsg);
+    else if (location) {
+      console.log(JSON.stringify(location));
+      (async () => {
+        let response = await Location.reverseGeocodeAsync({latitude: location.coords.latitude, longitude: location.coords.longitude});
+        for (let item of response) {
+            let address = `${item.name}, ${item.street}, ${item.postalCode}, ${item.city}`;
+            console.log(address);
+        }
+      })();
     }
-  }, [hasLocationPermission]);
+  }, [errorMsg, location]);
 
   function handleNavigationPoints() {
     /*navigation.navigate('Points', {
@@ -174,14 +164,14 @@ const styles = StyleSheet.create({
   title: {
     color: '#322153',
     fontSize: 29,
-    fontFamily: 'Satisfy_400Regular',
+    fontFamily: 'Satisfy-Regular',
     maxWidth: 260,
     marginTop: -30
   },
   description: {
     color: '#6C6C80',
     fontSize: 16,
-    fontFamily: 'Roboto_500Medium',
+    fontFamily: 'Roboto-Medium',
     marginTop: 16,
     maxWidth: 260,
     lineHeight: 24,
@@ -207,7 +197,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     textAlign: 'center',
     color: '#FFF',
-    fontFamily: 'Roboto_500Medium',
+    fontFamily: 'Roboto-Medium',
     fontSize: 16,
   },
   select: {
