@@ -1,17 +1,23 @@
 import {
-    Alert,
+  Alert,
   Image,
   ImageBackground,
   StyleSheet,
   Text,
-  View } from "react-native";
-import React, { useEffect, useState } from "react";
+  View } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { RectButton } from 'react-native-gesture-handler';
 import { Feather } from '@expo/vector-icons'; 
 import { Picker } from "@react-native-picker/picker";
 
 import * as Location from 'expo-location';
+
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { MapParams } from "../map";
+
+import Checkbox from 'expo-checkbox';
 
 const Home = () => {
   interface IBGEUF {
@@ -35,6 +41,10 @@ const Home = () => {
   const [cities, setCities] = useState<SelectItem[]>([]);
   const [selectedUF, setSelectedUF] = useState('0');
   const [selectedCity, setSelectedCity] = useState('0');
+
+  const [useCurrentLocation, setUseCurrentLocation] = useState(true);
+
+  const navigation = useNavigation<StackNavigationProp<MapParams>>();
   
   useEffect(() => {
     if (selectedUF === '0') {
@@ -72,7 +82,7 @@ const Home = () => {
       } else {
         let location = await Location.getCurrentPositionAsync({});
         setLocation(location);
-      }
+      } 
     })();
   }, []);
 
@@ -80,22 +90,32 @@ const Home = () => {
     if (errorMsg !== '')
       Alert.alert('Info', errorMsg);
     else if (location) {
-      console.log(JSON.stringify(location));
       (async () => {
         let response = await Location.reverseGeocodeAsync({latitude: location.coords.latitude, longitude: location.coords.longitude});
         for (let item of response) {
-            let address = `${item.name}, ${item.street}, ${item.postalCode}, ${item.city}`;
-            console.log(address);
+          let uf = ufs.filter(uf => uf.label === item.region);
+          let city = item.subregion ?? '';
+          if (uf.length > 0)
+            setTimeout(() => {
+              setSelectedUF(uf[0].value);
+              setSelectedCity(city);
+            }, 1000);
         }
       })();
     }
   }, [errorMsg, location]);
 
   function handleNavigationPoints() {
-    /*navigation.navigate('Points', {
-      selectedUF,
-      selectedCity
-    });*/
+    if (useCurrentLocation && location)
+      navigation.navigate('Map', {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude
+      });
+    else
+      navigation.navigate('Map', {
+        selectedUF,
+        selectedCity,
+      });
   }
 
   return (
@@ -109,11 +129,20 @@ const Home = () => {
         <Text style={styles.description}>Ajudando pessoas a comerem bem.</Text>
       </View>
       <View>
+        <View style={styles.section}>
+          <Checkbox
+            style={styles.checkbox}
+            value={useCurrentLocation}
+            onValueChange={() => setUseCurrentLocation(!useCurrentLocation)}
+          />
+          <Text style={styles.checkboxText}>Utilizar minha localização atual</Text>
+        </View>
         <Picker
           placeholder={'Selecione uma UF'}
           selectedValue={selectedUF}
           onValueChange={setSelectedUF}
           style={styles.select}
+          enabled={!useCurrentLocation}
         >
           {
             ufs.map((uf) =>
@@ -126,6 +155,7 @@ const Home = () => {
           selectedValue={selectedCity}
           onValueChange={setSelectedCity}
           style={styles.select}
+          enabled={!useCurrentLocation}
         >
           {
             cities.map((city) =>
@@ -204,6 +234,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#FFF',
     color: '#6C6C80',
+    fontFamily: 'Roboto-Medium',
+  },
+  checkbox: {
+    margin: 8,
+  },
+  checkboxText: {
+    fontSize: 16,
+    fontFamily: 'Roboto-Medium',
+  },
+  section: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF',
   },
 });
 
