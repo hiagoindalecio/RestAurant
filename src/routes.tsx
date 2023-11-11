@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import Home from './pages/home';
 import Map from './pages/map';
+import Detail from './pages/detail';
 
 const AppStack = createStackNavigator();
 
@@ -19,6 +20,7 @@ const Routes = () => {
         }}>
         <AppStack.Screen name="Home" component={Home} />
         <AppStack.Screen name="Map" component={Map} />
+        <AppStack.Screen name="Detail" component={Detail} />
       </AppStack.Navigator>
     </NavigationContainer>
   );

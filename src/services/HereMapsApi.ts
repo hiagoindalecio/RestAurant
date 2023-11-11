@@ -7,21 +7,11 @@ const mapsApi = axios.create({
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type Item = {
+export type Item = {
   title: string,
   id: string,
   address: {
     label: string,
-    countryCode: string,
-    countryName: string,
-    stateCode: string,
-    state: string,
-    county: string,
-    city: string,
-    district: string,
-    street: string,
-    postalCode: string,
-    houseNumber: number
   },
   position: { lat: number, lng: number },
   categories: [

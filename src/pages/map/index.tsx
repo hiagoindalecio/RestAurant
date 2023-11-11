@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
-
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import Emoji from 'react-native-emoji';
+import { HereApiRequests, Item } from '../../services/HereMapsApi';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { DetailParams } from '../detail';
 
-import { HereApiRequests } from '../../services/HereMapsApi';
+import LeftArrowIcon from '../../assets/icons/left-arrow.svg';
 
 export type MapParams = {
   Map: MapProps
@@ -18,20 +21,13 @@ type MapProps = {
 }
 
 const Map = () => {
-  interface Point {
-    id_point: string;
-    name: string;
-    latitude: number;
-    longitude: number;
-  }
-  
-  const [initialPosition, setInitialposition] = useState<[number, number]>([0, 0]);
-  const [points, setPoints] = useState<Point[]>([]);
-
   const route = useRoute();
   const routeParams = route.params as MapProps;
-  
-  const navigation = useNavigation();
+
+  const [initialPosition, setInitialposition] = useState<[number, number]>([0, 0]);
+  const [points, setPoints] = useState<Item[]>([]);
+
+  const navigation = useNavigation<StackNavigationProp<DetailParams>>();
 
   useEffect(() => {
     (async () => {
@@ -55,29 +51,31 @@ const Map = () => {
     if (initialPosition[0] !== 0)
       (async () => {
         var restaurants = await HereApiRequests.SearchByRestaurants(initialPosition[0], initialPosition[1]);
-        if (restaurants.length > 0) {
-          var foundPoints: Point[] = [];
-          restaurants.map(r => {
-            foundPoints.push({
-              id_point: r.id,
-              name: r.title,
-              latitude: r.position.lat,
-              longitude: r.position.lng
-            });
-          });
-
-          setPoints(foundPoints);
-        }
+        if (restaurants.length > 0)
+          setPoints(restaurants);
       })();
   }, [initialPosition])
 
   function handleNavigateToDetail(id: string) {
-    console.log('/Detail (TODO)')
-    //navigate('Detail', { state: { point_id: id } });
+    let selected = points.find(p => p.id === id);
+    if (selected)
+      navigation.navigate('Detail', { ...selected });
+    else
+      Alert.alert('Erro', 'Não foi possível coletar os dados do item selecionado, por favor, contacte o suporte.');
+  }
+
+  function handleNavigateBack() {
+    navigation.goBack();
   }
 
   return(
-    <View style={styles.mapContainer}>
+    <View style={styles.container}>
+      <TouchableOpacity onPress={handleNavigateBack}>
+        <LeftArrowIcon style={styles.backIcon} />
+      </TouchableOpacity>
+      <Text style={styles.title}><Emoji name=":blush:" style={{fontSize: 25}} /> Bem vindo!</Text>
+      <Text style={styles.description}>Encontre o local perfeito abaixo.</Text>
+      <View style={styles.mapContainer}>
       {
         initialPosition[0] !== 0 &&
         (<MapView 
@@ -91,27 +89,48 @@ const Map = () => {
           >
           {points.map(point => (
             <Marker
-              key={point.id_point}
+              key={point.id}
               style={styles.mapMarker}
-              onPress={() => handleNavigateToDetail(point.id_point)}
+              onPress={() => handleNavigateToDetail(point.id)}
               coordinate={{ 
-                latitude: point.latitude,
-                longitude: point.longitude,
+                latitude: point.position.lat,
+                longitude: point.position.lng,
               }}
             >
               <View style={styles.mapMarkerContainer}>
                 <Image style={styles.mapMarkerImage} source={require('../../assets/images/logo.png')} />
-                <Text style={styles.mapMarkerTitle}>{point.name}</Text>
+                <Text style={styles.mapMarkerTitle}>{point.title}</Text>
               </View>
             </Marker>
           ))}
         </MapView>)
       }
     </View>
+  </View>
   )
 }
 
 const styles = StyleSheet.create({
+  backIcon: {
+    color:'#C21807',
+    marginTop: 10,
+  },
+  container: {
+    flex: 1,
+    paddingHorizontal: 32,
+    paddingTop: 45,
+  },
+  title: {
+    fontSize: 20,
+    fontFamily: 'RobotoMedium',
+    marginTop: 24,
+  },
+  description: {
+    color: '#6C6C80',
+    fontSize: 16,
+    marginTop: 4,
+    fontFamily: 'RobotoMedium',
+  },
   mapContainer: {
     flex: 1,
     width: '100%',
@@ -136,7 +155,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
     borderColor: 'black',
-    borderWidth: 2,
+    borderWidth: 1,
   },
   mapMarkerImage: {
     width: 90,
@@ -147,7 +166,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: 'RobotoMedium',
     color: '#FFF',
-    fontSize: 14,
+    fontSize: 16,
     lineHeight: 23,
   },
 });

@@ -83,13 +83,13 @@ const Home = () => {
       } else {
         let location = await Location.getCurrentPositionAsync({});
         setLocation(location);
-      } 
+      }
     })();
   }, []);
 
   useEffect(() => {
     if (errorMsg !== '')
-      Alert.alert('Info', errorMsg);
+      Alert.alert('Erro', errorMsg);
     else if (location) {
       (async () => {
         let response = await Location.reverseGeocodeAsync({latitude: location.coords.latitude, longitude: location.coords.longitude});
@@ -100,7 +100,7 @@ const Home = () => {
             setTimeout(() => {
               setSelectedUF(uf[0].value);
               setSelectedCity(city);
-            }, 1000);
+            }, 500);
         }
       })();
     }
