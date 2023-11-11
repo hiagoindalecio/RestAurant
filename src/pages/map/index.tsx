@@ -52,21 +52,23 @@ const Map = () => {
   }, []);
 
   useEffect(() => {
-    (async () => {
-      var restaurants = await HereApiRequests.SearchByRestaurants(initialPosition[0], initialPosition[1]);
-      if (restaurants.length > 0) {
-        var foundPoints: Point[] = [];
-        restaurants.map(r => {
-          foundPoints.push({
-            id_point: r.id,
-            name: r.title,
-            latitude: r.position.lat,
-            longitude: r.position.lng
+    if (initialPosition[0] !== 0)
+      (async () => {
+        var restaurants = await HereApiRequests.SearchByRestaurants(initialPosition[0], initialPosition[1]);
+        if (restaurants.length > 0) {
+          var foundPoints: Point[] = [];
+          restaurants.map(r => {
+            foundPoints.push({
+              id_point: r.id,
+              name: r.title,
+              latitude: r.position.lat,
+              longitude: r.position.lng
+            });
           });
-        });
-        setPoints(foundPoints);
-      }
-    })();
+
+          setPoints(foundPoints);
+        }
+      })();
   }, [initialPosition])
 
   function handleNavigateToDetail(id: string) {
@@ -132,7 +134,9 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     borderRadius: 8,
     overflow: 'hidden',
-    alignItems: 'center'
+    alignItems: 'center',
+    borderColor: 'black',
+    borderWidth: 2,
   },
   mapMarkerImage: {
     width: 90,
@@ -141,7 +145,7 @@ const styles = StyleSheet.create({
   },
   mapMarkerTitle: {
     flex: 1,
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'RobotoMedium',
     color: '#FFF',
     fontSize: 14,
     lineHeight: 23,

@@ -8,7 +8,6 @@ import {
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { RectButton } from 'react-native-gesture-handler';
-import { Feather } from '@expo/vector-icons'; 
 import { Picker } from "@react-native-picker/picker";
 
 import * as Location from 'expo-location';
@@ -16,6 +15,8 @@ import * as Location from 'expo-location';
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MapParams } from "../map";
+
+import RightArrowIcon from '../../assets/icons/right-arrow.svg';
 
 import Checkbox from 'expo-checkbox';
 
@@ -165,9 +166,7 @@ const Home = () => {
         </Picker>
         <RectButton style={styles.button} onPress={handleNavigationPoints}>
           <View style={styles.buttonIcon}>
-            <Text>
-              <Feather name="chevron-right" size={24} color={'#FFF'} />
-            </Text>
+            <RightArrowIcon style={{color:'#FFF'}} />
           </View>
           <Text style={styles.buttonText}>
             Entrar
@@ -194,14 +193,14 @@ const styles = StyleSheet.create({
   title: {
     color: '#322153',
     fontSize: 29,
-    fontFamily: 'Satisfy-Regular',
+    fontFamily: 'SatisfyRegular',
     maxWidth: 260,
     marginTop: -30
   },
   description: {
     color: '#6C6C80',
     fontSize: 16,
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'RobotoMedium',
     marginTop: 16,
     maxWidth: 260,
     lineHeight: 24,
@@ -227,21 +226,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     textAlign: 'center',
     color: '#FFF',
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'RobotoMedium',
     fontSize: 16,
   },
   select: {
     fontSize: 16,
     backgroundColor: '#FFF',
     color: '#6C6C80',
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'RobotoMedium',
   },
   checkbox: {
     margin: 8,
   },
   checkboxText: {
     fontSize: 16,
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'RobotoMedium',
   },
   section: {
     flexDirection: 'row',

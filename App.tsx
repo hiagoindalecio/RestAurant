@@ -1,21 +1,30 @@
 import { StatusBar, useColorScheme } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 import Routes from './src/routes';
 
-import useCachedResources from './src/hooks/useCachedResources';
+import * as Font from 'expo-font';
 
-function App(): JSX.Element {
+export default function App() {
   const isDarkMode = useColorScheme() === 'dark';
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+  const [fontsLoaded, setFontsLoaded] = useState(false);
   
-  const [isLoadingComplete] = useCachedResources();
+  useEffect(() => {
+    (async () => {
+      await Font.loadAsync({
+        'RobotoMedium': require('./src/assets/fonts/Roboto-Medium.ttf'),
+        'SatisfyRegular': require('./src/assets/fonts/Satisfy-Regular.ttf'),
+      });
+      setFontsLoaded(true);
+    })();
+  }, []);  
 
-  if (!isLoadingComplete)
-    return <></>;
+  if (!fontsLoaded)
+    return null;
 
   return (
     <>
@@ -28,5 +37,3 @@ function App(): JSX.Element {
     </>
   );
 }
-
-export default App;
