@@ -10,21 +10,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export type Item = {
   title: string,
   id: string,
-  address: {
+  address?: {
     label: string,
   },
-  position: { lat: number, lng: number },
-  categories: [
+  position?: { lat: number, lng: number },
+  categories?: [
     {
       id: string,
       name: string,
       primary: boolean
     }
   ],
-  contacts: [
+  contacts?: [
     {
-      phone: [{ value: string }],
-      www: [{ value: string }]
+      phone?: [{ value: string }],
+      www?: [{ value: string }]
     }
   ]
 }

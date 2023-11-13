@@ -38,7 +38,7 @@ const Map = () => {
         ]);
       } else {
         var location = await HereApiRequests.SearchByText(`${routeParams.selectedCity}+${routeParams.selectedUF}`);
-        if (location !== null)
+        if (location !== null && location.position)
           setInitialposition([
             location.position.lat,
             location.position.lng
@@ -93,8 +93,8 @@ const Map = () => {
               style={styles.mapMarker}
               onPress={() => handleNavigateToDetail(point.id)}
               coordinate={{ 
-                latitude: point.position.lat,
-                longitude: point.position.lng,
+                latitude: point.position ? point.position.lat : 0,
+                longitude: point.position ? point.position.lng : 0,
               }}
             >
               <View style={styles.mapMarkerContainer}>
